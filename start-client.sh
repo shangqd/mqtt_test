@@ -1,5 +1,6 @@
-for ((i=1; i<=2; i ++))
+for ((i=1; i<=1000; i ++))
 do
-./client.py "lwc"$i > "lwc"$i &
-
+sleep 1
+./webapi_c.py > "log/lwc"$i &
+echo $i
 done
