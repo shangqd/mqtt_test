@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 
+import time
+import requests
+import json
+import sys
+import bbc
 import paho.mqtt.client as mqtt
 
 def lws_on_connect(client, userdata, flags, rc):
@@ -10,12 +15,17 @@ def lws_on_connect(client, userdata, flags, rc):
 def lws_on_message(client, userdata, msg):
     a = bytes.decode(msg.payload)
     if msg.topic == "lws":
-        print('subscribe: %s' % a)
         client.subscribe(a,qos=2)
-        client.publish(a, payload="lwc start",qos=2)
+        print('subscribe: %s' % a)
+        utxos = json.dumps(bbc.GetUtxo(a))
+        client.publish(a + "-", payload=utxos,qos=2)
+        
     else:
-        client.publish(msg.topic + "-", payload=msg.payload,qos=2)
-        print(msg.topic+","+str(msg.payload))
+        print(time.strftime("%H:%M:%S", time.localtime()),"client is",msg.topic)
+        response = requests.post("http://127.0.0.1:9902", json=json.loads(msg.payload))
+        client.publish(msg.topic + "-", payload=response.text,qos=2)
+
+
 
 def lws_run():
     client = mqtt.Client()

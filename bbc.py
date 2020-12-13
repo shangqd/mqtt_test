@@ -60,7 +60,7 @@ def GetTx(ts,forkid,utxo,addr,vchdata,pri_key):
 		txid = obj["txid"] 
 		txid = hexlify(unhexlify(txid)[::-1])
 		out_n = hexlify(struct.pack("<B", obj["out"]))
-		amount += int((obj["amount"] * 1000000))
+		amount += obj["amount"]
 		data = data + txid + out_n
 
 	data = data + Addr2Hex(addr)
@@ -98,6 +98,25 @@ def GetVchJson(data,ts):
 	b64_json_n = hexlify(struct.pack("<B", int(len(b64_json) / 2)))
 	return uuid.uuid1().hex.encode() + str_time + b64_json_n + b64_json + hexlify(json.dumps(json_data).encode())
 
+def GetUtxo(address):
+	url = 'http://127.0.0.1:9902'
+	forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
+	data_json = {
+		"id":1,
+		"method":"listunspent",
+		"jsonrpc":"2.0",
+		"params":
+		{
+			"address":address,
+			"fork":forkid
+		}
+	}
+	response = requests.post(url, json=data_json)
+	res = json.loads(response.text)
+	for obj in res["result"]["addresses"][0]["unspents"]:
+		obj["amount"] = int(obj["amount"] * 1000000)
+	return res["result"]["addresses"][0]["unspents"]
+	
 if __name__ == '__main__':
 	url = 'http://127.0.0.1:9902'
 	forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
@@ -130,6 +149,8 @@ if __name__ == '__main__':
 			"txdata":data["tx"]
 		}
 	}
+	print(data_json)
+	sys.exit()
 	response = requests.post(url, json=data_json)
 	res = json.loads(response.text)
 	if res["result"] == data["txid"].decode():
