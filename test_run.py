@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 
 import time
@@ -9,24 +9,11 @@ import sys
 from binascii import hexlify, unhexlify
 import struct
 from multiprocessing import Process
-import subprocess
+#import subprocess
+import os
 
-filename = 'test_addr490.json'
-
-with open(filename)as fp:
-    json_data = json.load(fp)
-    index = 1
-    for obj in json_data:
-        lwc_id = 'lwc%s' % index
-        index = index + 1
-        print(obj["privkey"],obj["pubkey"],lwc_id)
-        subprocess.Popen(['./client',obj["privkey"],obj["pubkey"],lwc_id])
-        time.sleep(index)
-        if index == 2:
-            exit()
-
-'''
 filename = 'test_addr510.json'
+
 with open(filename)as fp:
     json_data = json.load(fp)
     index = 1
@@ -34,8 +21,7 @@ with open(filename)as fp:
         lwc_id = 'lwc%s' % index
         index = index + 1
         print(obj["privkey"],obj["pubkey"],lwc_id)
-        subprocess.Popen(['./client',obj["privkey"],obj["pubkey"],lwc_id])
-        time.sleep(index)
-        if index == 2:
+        os.system('./lwc.py %s %s >./log/%s &' % (obj["address"],obj["privkey"], lwc_id))
+        time.sleep(1)
+        if index > 500:
             exit()
-'''

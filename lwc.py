@@ -9,9 +9,11 @@ import json
 
 
 clientid = "1965p604xzdrffvg90ax9bk0q3xyqn5zz2vc9zpbe3wdswzazj7d144mm"
+pri_key = "9df809804369829983150491d1086b99f6493356f91ccc080e661a76a976a4ee"
 amount = 0
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     clientid = sys.argv[1]
+    pri_key = sys.argv[2]
 
 print("clientid is %s" % clientid)
 
@@ -20,9 +22,12 @@ def on_connect(client, userdata, flags, rc):
     client.publish('lws', payload=clientid, qos=2)
     print("Connected with result code: " + str(rc))
 
+index = 0
 def on_message(client, userdata, msg):
     global clientid
     global amount
+    global pri_key
+    global index
     utxo = json.loads(msg.payload.decode())
     if "result" in utxo:
         utxo = [{
@@ -33,10 +38,10 @@ def on_message(client, userdata, msg):
     forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
     ts = int(time.time())
     vchdata = bbc.GetVchJson("hello bbc by shang",ts)
-    pri_key = "9df809804369829983150491d1086b99f6493356f91ccc080e661a76a976a4ee"
+    
     data = bbc.GetTx(ts,forkid,utxo,clientid,vchdata,pri_key)
     amount = data["amount"]
-    print(time.strftime("%H:%M:%S", time.localtime()),"addr:%s, amount:%s" % (clientid, amount / 1000000))
+    print(index,time.strftime("%H:%M:%S", time.localtime()),"addr:%s, amount:%s" % (clientid, amount / 1000000))
     data_json = {
 		"id":2,
 		"method":"sendrawtransaction",
@@ -46,8 +51,11 @@ def on_message(client, userdata, msg):
 			"txdata":data["tx"].decode()
 		}
 	}
-    time.sleep(3)
+    time.sleep(5)
     client.publish(clientid,payload=json.dumps(data_json), qos=2)
+    index = index + 1
+    if index > 500:
+        sys.exit()
 
 
 client = mqtt.Client()
