@@ -7,6 +7,7 @@ import json
 import sys
 import bbc
 import paho.mqtt.client as mqtt
+import conf
 
 def lws_on_connect(client, userdata, flags, rc):
     client.subscribe('lws',qos=2)
@@ -22,7 +23,7 @@ def lws_on_message(client, userdata, msg):
         
     else:
         print(time.strftime("%H:%M:%S", time.localtime()),"client is",msg.topic)
-        response = requests.post("http://127.0.0.1:9902", json=json.loads(msg.payload))
+        response = requests.post(conf.bbc_url, json=json.loads(msg.payload))
         client.publish(msg.topic + "-", payload=response.text,qos=2)
 
 

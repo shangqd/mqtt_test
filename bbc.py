@@ -11,6 +11,7 @@ import sys
 from binascii import hexlify, unhexlify
 import struct
 import base64
+import conf
 
 from ctypes import *
 
@@ -66,7 +67,7 @@ def GetTx(ts,forkid,utxo,addr,vchdata,pri_key):
 	data = data + Addr2Hex(addr)
 	fee =  TxFee(len(vchdata))
 
-	nAmount = hexlify(struct.pack("<Q", amount - fee))
+	nAmount = hexlify(struct.pack("<Q", int(amount - fee)))
 	data = data + nAmount
 
 	txfee = hexlify(struct.pack("<Q", fee))
@@ -99,7 +100,6 @@ def GetVchJson(data,ts):
 	return uuid.uuid1().hex.encode() + str_time + b64_json_n + b64_json + hexlify(json.dumps(json_data).encode())
 
 def GetUtxo(address):
-	url = 'http://127.0.0.1:9902'
 	forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
 	data_json = {
 		"id":1,
@@ -111,14 +111,14 @@ def GetUtxo(address):
 			"fork":forkid
 		}
 	}
-	response = requests.post(url, json=data_json)
+	response = requests.post(conf.bbc_url, json=data_json)
 	res = json.loads(response.text)
 	for obj in res["result"]["addresses"][0]["unspents"]:
 		obj["amount"] = int(obj["amount"] * 1000000)
 	return res["result"]["addresses"][0]["unspents"]
 	
 if __name__ == '__main__':
-	url = 'http://127.0.0.1:9902'
+	url = conf.bbc_url
 	forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
 	address = "1965p604xzdrffvg90ax9bk0q3xyqn5zz2vc9zpbe3wdswzazj7d144mm"
 	data_json = {
@@ -149,8 +149,6 @@ if __name__ == '__main__':
 			"txdata":data["tx"]
 		}
 	}
-	print(data_json)
-	sys.exit()
 	response = requests.post(url, json=data_json)
 	res = json.loads(response.text)
 	if res["result"] == data["txid"].decode():
