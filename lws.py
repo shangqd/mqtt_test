@@ -10,12 +10,12 @@ import paho.mqtt.client as mqtt
 import conf
 
 def lws_on_connect(client, userdata, flags, rc):
-    client.subscribe('lws',qos=2)
+    client.subscribe(conf.lws_id,qos=2)
     print("Connected with result code: " + str(rc))
 
 def lws_on_message(client, userdata, msg):
     a = bytes.decode(msg.payload)
-    if msg.topic == "lws":
+    if msg.topic == conf.lws_id:
         client.subscribe(a,qos=2)
         print('subscribe: %s' % a)
         utxos = json.dumps(bbc.GetUtxo(a))

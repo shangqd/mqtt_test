@@ -6,7 +6,7 @@ import time
 import sys
 import bbc
 import json
-
+import conf
 
 clientid = "1965p604xzdrffvg90ax9bk0q3xyqn5zz2vc9zpbe3wdswzazj7d144mm"
 pri_key = "9df809804369829983150491d1086b99f6493356f91ccc080e661a76a976a4ee"
@@ -19,7 +19,7 @@ print("clientid is %s" % clientid)
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe(clientid + "-", qos=2)
-    client.publish('lws', payload=clientid, qos=2)
+    client.publish(conf.lws_id, payload=clientid, qos=2)
     print("Connected with result code: " + str(rc))
 
 index = 0
@@ -37,7 +37,7 @@ def on_message(client, userdata, msg):
             "lockuntil": 0}]
     forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
     ts = int(time.time())
-    vchdata = bbc.GetVchJson("hello bbc by shang",ts)
+    vchdata = bbc.GetVchJson("hello 渝信码",ts)
     
     data = bbc.GetTx(ts,forkid,utxo,clientid,vchdata,pri_key)
     amount = data["amount"]

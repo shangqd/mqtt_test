@@ -5,4 +5,5 @@
 #password="12345"
 #database="btc_api"
 #charset="utf8"
-bbc_url="http://192.168.0.106:9902"
+bbc_url="http://127.0.0.1:9902"
+lws_id="yxm"
