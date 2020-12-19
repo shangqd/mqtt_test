@@ -31,8 +31,6 @@ def begin_test(client):
     print("zj -> (bbc and yxm)",json_data)
 
 def on_connect(client, userdata, flags, rc):
-    global forkid
-    global clientid
     client.subscribe("zj-sub", qos=2)
     client.subscribe(clientid, qos=2)
     bbc_cmd = {
@@ -50,13 +48,7 @@ def on_connect(client, userdata, flags, rc):
     threading.Thread(target=begin_test, args=(client,)).start()
 
 def lws_req(json_data):
-    global client
-    global clientid
     global amount
-    global pri_key
-    global index
-    global forkid
-    global utxo
     ts = int(time.time())
     vchdata = bbc.GetVchJson(json_data,ts)
     
@@ -76,11 +68,6 @@ def lws_req(json_data):
     client.publish("lws-" + conf.lws_id,payload=json.dumps(data_json), qos=2)
 
 def lws_resp(bbc_cmd_resp):
-    global clientid
-    global amount
-    global pri_key
-    global index
-    global forkid
     global utxo
     utxo = []
     if "result" in bbc_cmd_resp:
@@ -105,7 +92,6 @@ def yxm_req(josn_data):
 def yxm_resp(yxm_cmd_resp):
     print("yxm -> zj",yxm_cmd_resp)
     sys.exit()
-
 
 def on_message(client, userdata, msg): 
     global clientid

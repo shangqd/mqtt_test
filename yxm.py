@@ -18,8 +18,6 @@ utxo = []
 print("yxm addr is %s" % clientid)
 
 def on_connect(client, userdata, flags, rc):
-    global forkid
-    global clientid
     client.subscribe("yxm-sub", qos=2)
     client.subscribe(clientid, qos=2)
     bbc_cmd = {
@@ -36,11 +34,6 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code: " + str(rc))
 
 def lws_resp(bbc_cmd_resp):
-    global clientid
-    global amount
-    global pri_key
-    global index
-    global forkid
     global utxo
     utxo = []
     if "result" in bbc_cmd_resp:
@@ -60,13 +53,7 @@ def lws_resp(bbc_cmd_resp):
     print("bbc ok",len(utxo))
 
 def lws_req(josn_data):
-    global clientid
     global amount
-    global pri_key
-    global index
-    global forkid
-    global utxo
-    global client
     ts = int(time.time())
     vchdata = bbc.GetVchJson(josn_data,ts)
     
@@ -97,11 +84,9 @@ def zj_resp(zj_cmd_resp):
     zj_req(josn_data)
 
 def zj_req(josn_data):
-    global client
     client.publish("zj-sub",payload=josn_data, qos=2)
 
 def on_message(client, userdata, msg):
-    global clientid
     if msg.topic == clientid:
         bbc_cmd_resp = json.loads(msg.payload.decode())
         lws_resp(bbc_cmd_resp)

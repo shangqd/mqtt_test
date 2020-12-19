@@ -21,8 +21,6 @@ if len(sys.argv) > 1:
 print("clientid is %s" % clientid)
 
 def on_connect(client, userdata, flags, rc):
-    global forkid
-    global clientid
     client.subscribe(clientid, qos=2)
     bbc_cmd = {
         "id":0,
@@ -38,12 +36,8 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code: " + str(rc))
 
 def on_message(client, userdata, msg):
-    
-    global clientid
     global amount
-    global pri_key
     global index
-    global forkid
     bbc_cmd_resp = json.loads(msg.payload.decode())
     utxo = []
     if "result" in bbc_cmd_resp:
