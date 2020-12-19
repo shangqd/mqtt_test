@@ -3,8 +3,8 @@
 
 import os
 res = []
-for file in os.listdir("./log"):
-    f = open("./log/" + file,"r")
+for file in os.listdir("../log"):
+    f = open("../log/" + file,"r")
     ts = 0
     while True:
         text = f.readline()

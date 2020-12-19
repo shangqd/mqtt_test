@@ -12,7 +12,7 @@ from multiprocessing import Process
 #import subprocess
 import os
 
-filename = 'test_addr510.json'
+filename = './test/addr510.json'
 
 with open(filename)as fp:
     json_data = json.load(fp)

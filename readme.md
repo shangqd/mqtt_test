@@ -27,9 +27,16 @@ bigbang -daemon
 ```
 ### 压力测试
 ```
-./test_run.py
+./test.py
 ```
-### 统计压测
+### 压测统计
 ```
-./test_stat.py
+cd test
+./stat.py
+```
+### 渝信码测试，运行完成一个业务退出
+```
+./lws.py
+./yxm.py
+./zj.py
 ```

@@ -13,16 +13,14 @@ pri_key = "9df809804369829983150491d1086b99f6493356f91ccc080e661a76a976a4ee"
 forkid = "0000000006854ebdc236f48dbbe5c87312ea0abd7398888374b5ee9a5eb1d291"
 amount = 0
 index = 0
+utxo = []
 
-if len(sys.argv) > 1:
-    clientid = sys.argv[1]
-    pri_key = sys.argv[2]
-
-print("clientid is %s" % clientid)
+print("yxm addr is %s" % clientid)
 
 def on_connect(client, userdata, flags, rc):
     global forkid
     global clientid
+    client.subscribe("yxm-sub", qos=2)
     client.subscribe(clientid, qos=2)
     bbc_cmd = {
         "id":0,
@@ -37,14 +35,13 @@ def on_connect(client, userdata, flags, rc):
     client.publish("lws-" + conf.lws_id, payload=json.dumps(bbc_cmd), qos=2)
     print("Connected with result code: " + str(rc))
 
-def on_message(client, userdata, msg):
-    
+def lws_resp(bbc_cmd_resp):
     global clientid
     global amount
     global pri_key
     global index
     global forkid
-    bbc_cmd_resp = json.loads(msg.payload.decode())
+    global utxo
     utxo = []
     if "result" in bbc_cmd_resp:
         if "addresses" in bbc_cmd_resp["result"]:
@@ -60,12 +57,22 @@ def on_message(client, userdata, msg):
                 "out": 0, 
                 "amount": amount, 
                 "lockuntil": 0})
+    print("bbc ok",len(utxo))
+
+def lws_req(josn_data):
+    global clientid
+    global amount
+    global pri_key
+    global index
+    global forkid
+    global utxo
+    global client
     ts = int(time.time())
-    vchdata = bbc.GetVchJson("hello bbc by shang",ts)
+    vchdata = bbc.GetVchJson(josn_data,ts)
     
     data = bbc.GetTx(ts,forkid,utxo,clientid,vchdata,pri_key)
     amount = data["amount"]
-    print(index,ts,time.strftime("%H:%M:%S", time.localtime()),"addr:%s, amount:%s" % (clientid, amount / 1000000))
+    #print(index,ts,time.strftime("%H:%M:%S", time.localtime()),"addr:%s, amount:%s" % (clientid, amount / 1000000))
     data_json = {
 		"id":2,
 		"method":"sendrawtransaction",
@@ -77,11 +84,31 @@ def on_message(client, userdata, msg):
 		}
 	}
     client.publish("lws-" + conf.lws_id,payload=json.dumps(data_json), qos=2)
-    time.sleep(5)
-    index = index + 1
-    if index > 5:
-        # 程序退出导致最后一次发送失败
-        sys.exit()
+
+def zj_resp(zj_cmd_resp):
+    print("zj -> yxm",zj_cmd_resp)
+    josn_data = {
+        "type":"yxm --> zj",
+        "data":"123456"
+    }
+    josn_data = json.dumps(josn_data)
+    print("yxm -> (bbc and zj)",josn_data)
+    lws_req(josn_data)
+    zj_req(josn_data)
+
+def zj_req(josn_data):
+    global client
+    client.publish("zj-sub",payload=josn_data, qos=2)
+
+def on_message(client, userdata, msg):
+    global clientid
+    if msg.topic == clientid:
+        bbc_cmd_resp = json.loads(msg.payload.decode())
+        lws_resp(bbc_cmd_resp)
+    
+    if msg.topic == "yxm-sub":
+        zj_cmd_resp = json.loads(msg.payload.decode())
+        zj_resp(zj_cmd_resp)
 
 client = mqtt.Client()
 client.on_connect = on_connect
