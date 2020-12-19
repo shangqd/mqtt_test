@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 import time
@@ -7,24 +7,19 @@ import json
 import sys
 import bbc
 import paho.mqtt.client as mqtt
+import conf
 
 def lws_on_connect(client, userdata, flags, rc):
-    client.subscribe('lws',qos=2)
+    client.subscribe("lws-" + conf.lws_id,qos=2)
     print("Connected with result code: " + str(rc))
 
 def lws_on_message(client, userdata, msg):
-    a = bytes.decode(msg.payload)
-    if msg.topic == "lws":
-        client.subscribe(a,qos=2)
-        print('subscribe: %s' % a)
-        utxos = json.dumps(bbc.GetUtxo(a))
-        client.publish(a + "-", payload=utxos,qos=2)
-        
-    else:
-        print(time.strftime("%H:%M:%S", time.localtime()),"client is",msg.topic)
-        response = requests.post("http://127.0.0.1:9902", json=json.loads(msg.payload))
-        client.publish(msg.topic + "-", payload=response.text,qos=2)
-
+    try:
+        bbc_cmd = json.loads(msg.payload)
+        response = requests.post(conf.bbc_url, json=bbc_cmd)
+        client.publish(bbc_cmd["address"], payload=response.text,qos=2)
+    except:
+        print("err:",time.strftime("%H:%M:%S", time.localtime()),bbc_cmd,response.text)
 
 
 def lws_run():

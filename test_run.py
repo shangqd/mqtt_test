@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 import time
@@ -23,5 +23,5 @@ with open(filename)as fp:
         print(obj["privkey"],obj["pubkey"],lwc_id)
         os.system('./lwc.py %s %s >./log/%s &' % (obj["address"],obj["privkey"], lwc_id))
         time.sleep(1)
-        if index > 500:
+        if index > 50:
             exit()
